@@ -216,6 +216,11 @@ table.grid tbody tr:hover { background: rgba(124, 147, 255, .05); }
   border-radius: 8px; font-size: .9rem;
 }
 .ai-answer p { margin: .5rem 0 0; }
+.prompt-box {
+  width: 100%; margin-top: .5rem; resize: vertical;
+  font-family: var(--mono); font-size: .78rem; line-height: 1.45;
+  white-space: pre; overflow: auto;
+}
 .spinner { color: var(--accent-2); font-size: .85rem; }
 .htmx-indicator { opacity: 0; transition: opacity .2s ease; }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }

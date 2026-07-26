@@ -84,6 +84,7 @@ func (s *Server) routes() {
 
 	s.mux.HandleFunc("GET /ai", s.aiPage)
 	s.mux.HandleFunc("POST /ai/generate", s.aiGenerate)
+	s.mux.HandleFunc("POST /ai/prompt", s.aiPrompt)
 	s.mux.HandleFunc("POST /query/run", s.runQuery)
 
 	s.mux.HandleFunc("GET /settings", s.settingsPage)

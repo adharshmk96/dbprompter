@@ -1,0 +1,31 @@
+{{define "ai_prompt"}}
+<div class="ai-answer">
+  <div class="row between">
+    <strong>AI prompt</strong>
+    <button type="button" class="btn" id="copy-prompt-btn">⧉ Copy</button>
+  </div>
+  <p class="muted xs">Paste this into any AI chat. Put the SQL it returns in the editor and press Run.</p>
+  <textarea class="prompt-box" id="prompt-box" readonly rows="10">{{.Prompt}}</textarea>
+</div>
+<script>
+  (function () {
+    const box = document.getElementById('prompt-box');
+    const btn = document.getElementById('copy-prompt-btn');
+    function flash() {
+      btn.textContent = '✓ Copied';
+      setTimeout(function () { btn.textContent = '⧉ Copy'; }, 1500);
+    }
+    function copy() {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(box.value).then(flash, function () { box.select(); });
+      } else {
+        box.select();
+        document.execCommand('copy');
+        flash();
+      }
+    }
+    btn.addEventListener('click', copy);
+    copy(); // copy straight away; the textarea is the fallback if the browser blocks it
+  })();
+</script>
+{{end}}

@@ -216,6 +216,25 @@ func (s *Server) aiGenerate(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// aiPrompt renders the exact prompt that would be sent to a model, so the user
+// can copy it into any AI chat. Works with no provider configured.
+func (s *Server) aiPrompt(w http.ResponseWriter, r *http.Request) {
+	connID, _ := strconv.ParseInt(r.FormValue("conn"), 10, 64)
+	question := strings.TrimSpace(r.FormValue("question"))
+	if connID == 0 || question == "" {
+		s.renderAlert(w, "error", "Pick a connection and type a question.")
+		return
+	}
+	system, user, err := s.ai.BuildPrompt(connID, question)
+	if err != nil {
+		s.renderAlert(w, "error", errText(err))
+		return
+	}
+	s.renderPart(w, "ai_prompt", map[string]any{
+		"Prompt": system + "\n\n" + user,
+	})
+}
+
 func (s *Server) runQuery(w http.ResponseWriter, r *http.Request) {
 	connID, _ := strconv.ParseInt(r.FormValue("conn"), 10, 64)
 	sqlText := r.FormValue("sql")

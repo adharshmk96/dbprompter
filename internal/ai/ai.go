@@ -41,24 +41,34 @@ Rules:
 - Table descriptions and tags explain what the data means — trust them.
 - Unless the question asks otherwise, limit large results to 100 rows.`
 
-func (s *Service) GenerateSQL(ctx context.Context, connID, providerID int64, question string) (GenerateResult, error) {
+// BuildPrompt renders the exact system and user messages that GenerateSQL
+// would send for this connection and question. It needs no provider, so the
+// UI can offer the prompt for copy-paste even with no AI configured.
+func (s *Service) BuildPrompt(connID int64, question string) (system, user string, err error) {
 	conn, err := s.st.GetConnection(connID)
 	if err != nil {
-		return GenerateResult{}, fmt.Errorf("load connection: %w", err)
+		return "", "", fmt.Errorf("load connection: %w", err)
 	}
+	schemaCtx, err := s.buildContext(connID, question)
+	if err != nil {
+		return "", "", fmt.Errorf("build schema context: %w", err)
+	}
+	dialect := dialectName(conn.Type)
+	system = fmt.Sprintf(systemPromptFmt, dialect, dialect)
+	user = fmt.Sprintf("Database schema:\n\n%s\n\nQuestion: %s", schemaCtx, question)
+	return system, user, nil
+}
+
+func (s *Service) GenerateSQL(ctx context.Context, connID, providerID int64, question string) (GenerateResult, error) {
 	prov, err := s.st.GetProvider(providerID)
 	if err != nil {
 		return GenerateResult{}, fmt.Errorf("load AI provider: %w", err)
 	}
 
-	schemaCtx, err := s.buildContext(connID, question)
+	system, user, err := s.BuildPrompt(connID, question)
 	if err != nil {
-		return GenerateResult{}, fmt.Errorf("build schema context: %w", err)
+		return GenerateResult{}, err
 	}
-
-	dialect := dialectName(conn.Type)
-	system := fmt.Sprintf(systemPromptFmt, dialect, dialect)
-	user := fmt.Sprintf("Database schema:\n\n%s\n\nQuestion: %s", schemaCtx, question)
 
 	ctx, cancel := context.WithTimeout(ctx, 120*time.Second)
 	defer cancel()

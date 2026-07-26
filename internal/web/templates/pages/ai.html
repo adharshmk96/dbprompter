@@ -2,31 +2,44 @@
 {{if not .Connections}}
   <div class="empty">No connections yet. <a href="/connections">Add a database</a> first.</div>
 {{else}}
-<div class="{{if .Providers}}ai-grid{{end}}">
-  {{if .Providers}}
+<div class="ai-grid">
   <section class="card">
     <h2>Ask your database</h2>
     <form id="ai-form">
+      {{if .Providers}}
       <label>AI provider
         <select name="provider">
           {{range .Providers}}<option value="{{.ID}}">{{.Name}} — {{.Model}}</option>{{end}}
         </select>
       </label>
+      {{end}}
       <label>Question
         <textarea name="question" rows="3" placeholder="e.g. Top 10 customers by total order value in the last 90 days"></textarea>
       </label>
       <div class="row gap">
+        {{if .Providers}}
         <button type="button" class="btn primary"
           hx-post="/ai/generate" hx-include="#ai-form, #conn-select" hx-target="#ai-result" hx-swap="innerHTML"
           hx-indicator="#ai-spinner">
           ✦ Generate SQL
         </button>
-        <span id="ai-spinner" class="htmx-indicator spinner">thinking…</span>
+        {{end}}
+        <button type="button" class="btn{{if not .Providers}} primary{{end}}"
+          hx-post="/ai/prompt" hx-include="#ai-form, #conn-select" hx-target="#ai-result" hx-swap="innerHTML"
+          hx-indicator="#ai-spinner">
+          ⧉ Copy AI prompt
+        </button>
+        <span id="ai-spinner" class="htmx-indicator spinner">working…</span>
       </div>
     </form>
     <div id="ai-result"></div>
+    {{if not .Providers}}
+    <p class="muted xs">
+      No AI provider configured — copy the prompt into any AI chat, or
+      <a href="/settings">configure a provider</a> to generate SQL in place.
+    </p>
+    {{end}}
   </section>
-  {{end}}
 
   <section class="card">
     <div class="row between">
@@ -49,12 +62,6 @@
       </button>
       <span id="run-spinner" class="htmx-indicator spinner">running…</span>
     </div>
-    {{if not .Providers}}
-    <p class="muted xs" style="margin-top:.75rem">
-      Want to turn plain English into SQL? <a href="/settings">Configure an AI provider</a> —
-      an Anthropic API key, or a local model via Ollama / LM Studio.
-    </p>
-    {{end}}
   </section>
 </div>
 
