@@ -14,10 +14,12 @@
         </select>
       </label>
     </form>
-    <input type="search" name="q" placeholder="Search tables, columns, tags…"
-      hx-get="/explorer/tables" hx-include="this" hx-vals='{"conn": "{{.CurrentConn}}"}'
-      hx-target="#table-list" hx-swap="innerHTML"
-      hx-trigger="input changed delay:250ms, search">
+    <label>Search
+      <input type="search" name="q" placeholder="Tables, columns, tags…"
+        hx-get="/explorer/tables" hx-include="this" hx-vals='{"conn": "{{.CurrentConn}}"}'
+        hx-target="#table-list" hx-swap="innerHTML"
+        hx-trigger="input changed delay:250ms, search">
+    </label>
     <div id="table-list" class="table-list">
       {{template "table_list" (dict "Tables" .Tables)}}
     </div>

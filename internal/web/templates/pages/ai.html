@@ -21,13 +21,22 @@
         <button type="button" class="btn primary"
           hx-post="/ai/generate" hx-include="#ai-form, #conn-select" hx-target="#ai-result" hx-swap="innerHTML"
           hx-indicator="#ai-spinner">
-          ✦ Generate SQL
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>
+          </svg>
+          Generate SQL
         </button>
         {{end}}
         <button type="button" class="btn{{if not .Providers}} primary{{end}}"
           hx-post="/ai/prompt" hx-include="#ai-form, #conn-select" hx-target="#ai-result" hx-swap="innerHTML"
           hx-indicator="#ai-spinner">
-          ⧉ Copy AI prompt
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="12" height="12" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy AI prompt
         </button>
         <span id="ai-spinner" class="htmx-indicator spinner">working…</span>
       </div>
@@ -42,10 +51,10 @@
   </section>
 
   <section class="card">
-    <div class="row between">
-      <h2>Query editor</h2>
+    <div class="row between" style="margin-bottom:1rem">
+      <h2 style="margin:0">Query editor</h2>
       <label class="row gap check">
-        <input type="checkbox" id="allow-writes"> allow writes
+        <input type="checkbox" id="allow-writes"> <span class="muted sm">allow writes</span>
       </label>
     </div>
     <label>Connection
@@ -58,7 +67,10 @@
       <button class="btn primary" id="run-btn"
         hx-post="/query/run" hx-target="#query-results" hx-swap="innerHTML"
         hx-indicator="#run-spinner">
-        ▶ Run query
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+          <path d="M8 5.14v13.72a1 1 0 0 0 1.52.86l11.14-6.86a1 1 0 0 0 0-1.72L9.52 4.28A1 1 0 0 0 8 5.14Z"/>
+        </svg>
+        Run query
       </button>
       <span id="run-spinner" class="htmx-indicator spinner">running…</span>
     </div>
@@ -70,7 +82,7 @@
 <script>
   const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
     mode: 'text/x-sql',
-    theme: 'material-darker',
+    theme: 'dbp',
     lineNumbers: true,
     lineWrapping: true,
     viewportMargin: Infinity
