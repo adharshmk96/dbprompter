@@ -1,0 +1,82 @@
+version: 2
+
+project_name: dbprompter
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: dbprompter
+    main: .
+    binary: dbprompter
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/adharshmk96/dbprompter/cmd.version={{.Version}}
+      - -X github.com/adharshmk96/dbprompter/cmd.commit={{.Commit}}
+      - -X github.com/adharshmk96/dbprompter/cmd.date={{.Date}}
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - Readme.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+
+homebrew_casks:
+  - name: dbprompter
+    binaries:
+      - dbprompter
+    ids:
+      - default
+    repository:
+      owner: adharshmk96
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Casks
+    homepage: https://github.com/adharshmk96/dbprompter
+    description: "Explore any database and query it with AI"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "brew: update {{ .ProjectName }} to {{ .Tag }}"
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/dbprompter"]
+          end
+
+release:
+  draft: false
+  prerelease: auto
