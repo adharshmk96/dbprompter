@@ -1,0 +1,30 @@
+{{define "content"}}
+{{if not .Connections}}
+  <div class="empty">No connections yet. <a href="/connections">Add one</a> to start exploring.</div>
+{{else}}
+<div class="explorer-grid">
+  <aside class="card explorer-side">
+    <form method="get" action="/explorer">
+      <label>Connection
+        <select name="conn" onchange="this.form.submit()">
+          {{$current := .CurrentConn}}
+          {{range .Connections}}
+            <option value="{{.ID}}" {{if eq .ID $current}}selected{{end}}>{{.Name}} ({{.Type}})</option>
+          {{end}}
+        </select>
+      </label>
+    </form>
+    <input type="search" name="q" placeholder="Search tables, columns, tags…"
+      hx-get="/explorer/tables" hx-include="this" hx-vals='{"conn": "{{.CurrentConn}}"}'
+      hx-target="#table-list" hx-swap="innerHTML"
+      hx-trigger="input changed delay:250ms, search">
+    <div id="table-list" class="table-list">
+      {{template "table_list" (dict "Tables" .Tables)}}
+    </div>
+  </aside>
+  <section id="table-detail" class="card detail-panel">
+    <div class="empty">Select a table to see its columns, foreign keys, and tags.</div>
+  </section>
+</div>
+{{end}}
+{{end}}

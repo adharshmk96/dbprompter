@@ -1,0 +1,16 @@
+{{define "conn_status"}}
+{{if or (eq .Job.Status "running") (eq .Job.Status "pending")}}
+  <div id="status-{{.ID}}" class="status running"
+    hx-get="/connections/{{.ID}}/status" hx-trigger="every 1.5s" hx-swap="outerHTML">
+    <span class="dot pulse"></span> Indexing…{{if gt .Job.Total 0}} {{.Job.Total}} tables found{{end}}
+  </div>
+{{else if eq .Job.Status "error"}}
+  <div id="status-{{.ID}}" class="status error">
+    <span class="dot red"></span> Index failed: {{.Job.Error}}
+  </div>
+{{else}}
+  <div id="status-{{.ID}}" class="status ok">
+    <span class="dot green"></span> {{.TableCount}} tables indexed
+  </div>
+{{end}}
+{{end}}

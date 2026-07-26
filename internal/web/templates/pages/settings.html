@@ -1,0 +1,54 @@
+{{define "content"}}
+<div class="two-col">
+  <section class="card" x-data="{ kind: 'anthropic' }">
+    <h2>Add AI provider</h2>
+    <p class="muted">Keys are stored only in your local app database.</p>
+    <form method="post" action="/settings/providers">
+      <label>Name
+        <input name="name" placeholder="Claude / Local Ollama" required>
+      </label>
+      <label>Kind
+        <select name="kind" x-model="kind">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI-compatible (OpenAI, Ollama, LM Studio, …)</option>
+        </select>
+      </label>
+      <label>Base URL <span class="muted">(optional for Anthropic/OpenAI cloud)</span>
+        <input name="base_url"
+          :placeholder="kind === 'anthropic' ? 'leave empty for api.anthropic.com' : 'http://localhost:11434/v1 (Ollama)'">
+      </label>
+      <label>API key <span class="muted">(leave empty for local models)</span>
+        <input name="api_key" type="password" autocomplete="off">
+      </label>
+      <label>Model
+        <input name="model" required
+          :placeholder="kind === 'anthropic' ? 'claude-opus-5' : 'gpt-5 / llama3.1 / qwen2.5-coder'"
+          :value="kind === 'anthropic' ? 'claude-opus-5' : ''">
+      </label>
+      <button class="btn primary" type="submit">Save provider</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Configured providers</h2>
+    {{if not .Providers}}
+      <div class="empty">Nothing yet. Add Anthropic with an API key, or point an OpenAI-compatible provider at a local Ollama server.</div>
+    {{end}}
+    {{range .Providers}}
+    <div class="card conn-card">
+      <div class="conn-head">
+        <div>
+          <span class="conn-name">{{.Name}}</span>
+          <span class="pill pill-{{.Kind}}">{{.Kind}}</span>
+          <span class="mono muted">{{.Model}}</span>
+        </div>
+        <form method="post" action="/settings/providers/{{.ID}}/delete">
+          <button class="btn danger sm">Delete</button>
+        </form>
+      </div>
+      {{if .BaseURL}}<div class="conn-dsn mono">{{.BaseURL}}</div>{{end}}
+    </div>
+    {{end}}
+  </section>
+</div>
+{{end}}

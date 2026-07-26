@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DB Prompter</title>
+  <link rel="stylesheet" href="/static/vendor/codemirror.min.css">
+  <link rel="stylesheet" href="/static/vendor/cm-theme.min.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/vendor/htmx.min.js"></script>
+  <script defer src="/static/vendor/alpine.min.js"></script>
+  <script src="/static/vendor/codemirror.min.js"></script>
+  <script src="/static/vendor/cm-sql.min.js"></script>
+</head>
+<body>
+  <nav class="topnav">
+    <div class="brand"><span class="brand-mark">◈</span> DB&nbsp;Prompter</div>
+    <div class="tabs">
+      <a href="/connections" class="tab {{if eq .Active "connections"}}active{{end}}">Connections</a>
+      <a href="/explorer" class="tab {{if eq .Active "explorer"}}active{{end}}">Explorer</a>
+      <a href="/ai" class="tab {{if eq .Active "ai"}}active{{end}}">Query</a>
+      <a href="/settings" class="tab {{if eq .Active "settings"}}active{{end}}">Settings</a>
+    </div>
+  </nav>
+  <main class="container">
+    {{template "content" .}}
+  </main>
+</body>
+</html>

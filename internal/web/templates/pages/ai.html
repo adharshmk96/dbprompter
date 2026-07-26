@@ -1,0 +1,84 @@
+{{define "content"}}
+{{if not .Connections}}
+  <div class="empty">No connections yet. <a href="/connections">Add a database</a> first.</div>
+{{else}}
+<div class="{{if .Providers}}ai-grid{{end}}">
+  {{if .Providers}}
+  <section class="card">
+    <h2>Ask your database</h2>
+    <form id="ai-form">
+      <label>AI provider
+        <select name="provider">
+          {{range .Providers}}<option value="{{.ID}}">{{.Name}} — {{.Model}}</option>{{end}}
+        </select>
+      </label>
+      <label>Question
+        <textarea name="question" rows="3" placeholder="e.g. Top 10 customers by total order value in the last 90 days"></textarea>
+      </label>
+      <div class="row gap">
+        <button type="button" class="btn primary"
+          hx-post="/ai/generate" hx-include="#ai-form, #conn-select" hx-target="#ai-result" hx-swap="innerHTML"
+          hx-indicator="#ai-spinner">
+          ✦ Generate SQL
+        </button>
+        <span id="ai-spinner" class="htmx-indicator spinner">thinking…</span>
+      </div>
+    </form>
+    <div id="ai-result"></div>
+  </section>
+  {{end}}
+
+  <section class="card">
+    <div class="row between">
+      <h2>Query editor</h2>
+      <label class="row gap check">
+        <input type="checkbox" id="allow-writes"> allow writes
+      </label>
+    </div>
+    <label>Connection
+      <select name="conn" id="conn-select">
+        {{range .Connections}}<option value="{{.ID}}">{{.Name}} ({{.Type}})</option>{{end}}
+      </select>
+    </label>
+    <textarea id="sql-editor">-- Write SQL here, then press Run.</textarea>
+    <div class="row gap" style="margin-top:.75rem">
+      <button class="btn primary" id="run-btn"
+        hx-post="/query/run" hx-target="#query-results" hx-swap="innerHTML"
+        hx-indicator="#run-spinner">
+        ▶ Run query
+      </button>
+      <span id="run-spinner" class="htmx-indicator spinner">running…</span>
+    </div>
+    {{if not .Providers}}
+    <p class="muted xs" style="margin-top:.75rem">
+      Want to turn plain English into SQL? <a href="/settings">Configure an AI provider</a> —
+      an Anthropic API key, or a local model via Ollama / LM Studio.
+    </p>
+    {{end}}
+  </section>
+</div>
+
+<section id="query-results"></section>
+
+<script>
+  const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
+    mode: 'text/x-sql',
+    theme: 'material-darker',
+    lineNumbers: true,
+    lineWrapping: true,
+    viewportMargin: Infinity
+  });
+  window.dbpSetSQL = function (sql) {
+    editor.setValue(sql);
+    editor.focus();
+  };
+  document.body.addEventListener('htmx:configRequest', function (e) {
+    if (e.detail.path === '/query/run') {
+      e.detail.parameters.sql = editor.getValue();
+      e.detail.parameters.conn = document.getElementById('conn-select').value;
+      e.detail.parameters.allow_writes = document.getElementById('allow-writes').checked ? 'on' : '';
+    }
+  });
+</script>
+{{end}}
+{{end}}

@@ -1,0 +1,5 @@
+/dbprompter
+*.db
+*.db-shm
+*.db-wal
+requirement

@@ -1,0 +1,25 @@
+{{define "results"}}
+<div class="card results-card">
+  {{if .IsSelect}}
+    <div class="row between results-meta">
+      <span>{{len .Rows}} row{{if ne (len .Rows) 1}}s{{end}}{{if .Truncated}} <span class="pill nn">truncated at 500</span>{{end}}</span>
+      <span class="muted xs">{{.Duration}}</span>
+    </div>
+    <div class="results-scroll">
+      <table class="grid results">
+        <thead><tr>{{range .Columns}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>{{range .}}<td class="mono">{{.}}</td>{{end}}</tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div class="results-meta">
+      <span class="pill pk">OK</span> {{.RowsAffected}} row{{if ne .RowsAffected 1}}s{{end}} affected
+      <span class="muted xs">{{.Duration}}</span>
+    </div>
+  {{end}}
+</div>
+{{end}}

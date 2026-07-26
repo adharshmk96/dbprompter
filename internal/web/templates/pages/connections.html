@@ -1,0 +1,67 @@
+{{define "content"}}
+<div class="two-col">
+  <section class="card" x-data="{ type: 'postgres' }">
+    <h2>Add connection</h2>
+    <form method="post" action="/connections" id="conn-form">
+      <label>Name
+        <input name="name" placeholder="Production analytics" required>
+      </label>
+      <label>Database type
+        <select name="type" x-model="type">
+          <option value="postgres">PostgreSQL</option>
+          <option value="mysql">MySQL / MariaDB</option>
+          <option value="mssql">SQL Server</option>
+          <option value="sqlite">SQLite</option>
+        </select>
+      </label>
+      <label>DSN / connection string
+        <input name="dsn" required
+          :placeholder="{
+            postgres: 'postgres://user:pass@localhost:5432/dbname',
+            mysql:    'user:pass@tcp(localhost:3306)/dbname',
+            mssql:    'sqlserver://user:pass@localhost:1433?database=dbname',
+            sqlite:   '/path/to/database.db'
+          }[type]">
+      </label>
+      <div class="row gap">
+        <button type="button" class="btn ghost"
+          hx-post="/connections/test" hx-include="#conn-form" hx-target="#test-result" hx-swap="innerHTML">
+          Test connection
+        </button>
+        <button type="submit" class="btn primary">Save &amp; index</button>
+      </div>
+      <div id="test-result"></div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Saved connections</h2>
+    {{if not .Connections}}
+      <div class="empty">No connections yet — add your first database on the left.</div>
+    {{end}}
+    {{range .Connections}}
+    <div class="card conn-card">
+      <div class="conn-head">
+        <div>
+          <span class="conn-name">{{.Name}}</span>
+          <span class="pill pill-{{.Type}}">{{.Type}}</span>
+        </div>
+        <div class="row gap">
+          <a class="btn ghost sm" href="/explorer?conn={{.ID}}">Explore</a>
+          <button class="btn ghost sm"
+            hx-post="/connections/{{.ID}}/reindex" hx-target="#status-{{.ID}}" hx-swap="outerHTML">
+            Re-index
+          </button>
+          <form method="post" action="/connections/{{.ID}}/delete"
+            onsubmit="return confirm('Delete this connection and its indexed metadata?')">
+            <button class="btn danger sm">Delete</button>
+          </form>
+        </div>
+      </div>
+      <div class="conn-dsn mono">{{.DSN}}</div>
+      {{template "conn_status" (dict "Job" .Job "TableCount" .TableCount "ID" .ID)}}
+    </div>
+    {{end}}
+  </section>
+</div>
+{{end}}

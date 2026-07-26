@@ -1,0 +1,54 @@
+{{define "table_detail"}}
+<div class="detail-head">
+  <h2>{{if .Schema}}{{if ne .Schema "public"}}<span class="muted">{{.Schema}}.</span>{{end}}{{end}}{{.Name}}</h2>
+  {{if ge .RowCount 0}}<span class="pill">~{{.RowCount}} rows</span>{{end}}
+</div>
+{{if .Comment}}<p class="muted">{{.Comment}}</p>{{end}}
+
+<form hx-post="/explorer/table/{{.ID}}/tags" hx-target="#table-detail" hx-swap="innerHTML" class="tags-form">
+  <div class="row gap">
+    <label class="grow">Tags <span class="muted">(what kind of data lives here — used by the AI)</span>
+      <input name="tags" value="{{.Tags}}" placeholder="sales, orders, revenue">
+    </label>
+  </div>
+  <label>Note
+    <input name="note" value="{{.Note}}" placeholder="One order row per checkout; soft-deleted rows have deleted_at set">
+  </label>
+  <button class="btn ghost sm" type="submit">Save tags</button>
+</form>
+
+<h3>Columns</h3>
+<table class="grid">
+  <thead><tr><th>Name</th><th>Type</th><th></th></tr></thead>
+  <tbody>
+    {{range .Columns}}
+    <tr>
+      <td class="mono">{{.Name}}</td>
+      <td class="mono muted">{{.DataType}}</td>
+      <td>
+        {{if .PK}}<span class="pill pk">PK</span>{{end}}
+        {{if not .Nullable}}<span class="pill nn">NOT NULL</span>{{end}}
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+
+{{if .OutgoingFKs}}
+<h3>References</h3>
+<ul class="fk-list">
+  {{range .OutgoingFKs}}
+  <li class="mono"><span class="muted">{{.FromTable}}.</span>{{.FromColumn}} → {{.ToTable}}.{{.ToColumn}}</li>
+  {{end}}
+</ul>
+{{end}}
+
+{{if .IncomingFKs}}
+<h3>Referenced by</h3>
+<ul class="fk-list">
+  {{range .IncomingFKs}}
+  <li class="mono">{{.FromTable}}.{{.FromColumn}} → <span class="muted">{{.ToTable}}.</span>{{.ToColumn}}</li>
+  {{end}}
+</ul>
+{{end}}
+{{end}}

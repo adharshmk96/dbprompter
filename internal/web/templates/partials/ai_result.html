@@ -1,0 +1,11 @@
+{{define "ai_result"}}
+<div class="ai-answer">
+  <div class="row between">
+    <strong>Suggested query</strong>
+    <span class="muted xs">model: {{.Model}}</span>
+  </div>
+  {{if .Explanation}}<p>{{.Explanation}}</p>{{end}}
+  <p class="muted xs">The query has been placed in the editor — review it, then press Run.</p>
+</div>
+<script>window.dbpSetSQL({{.SQL}});</script>
+{{end}}

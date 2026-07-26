@@ -1,0 +1,16 @@
+{{define "table_list"}}
+{{if not .Tables}}
+  <div class="empty sm">No tables match.</div>
+{{end}}
+<ul class="tables">
+  {{range .Tables}}
+  <li hx-get="/explorer/table/{{.ID}}" hx-target="#table-detail" hx-swap="innerHTML">
+    <div class="row between">
+      <span class="table-name">{{if .Schema}}{{if ne .Schema "public"}}<span class="muted">{{.Schema}}.</span>{{end}}{{end}}{{.Name}}</span>
+      {{if ge .RowCount 0}}<span class="muted xs">~{{.RowCount}}</span>{{end}}
+    </div>
+    {{if .Tags}}<div class="tagline">{{.Tags}}</div>{{end}}
+  </li>
+  {{end}}
+</ul>
+{{end}}
