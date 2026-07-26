@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/adharshmk96/dbprompter/internal/ai"
@@ -94,6 +95,11 @@ func (s *Server) routes() {
 
 func (s *Server) Listen(addr string) error {
 	return http.ListenAndServe(addr, s.mux)
+}
+
+// Serve serves on an already-bound listener.
+func (s *Server) Serve(ln net.Listener) error {
+	return http.Serve(ln, s.mux)
 }
 
 // renderPage executes a full page through the layout.

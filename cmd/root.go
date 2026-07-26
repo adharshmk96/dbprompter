@@ -13,7 +13,11 @@ var rootCmd = &cobra.Command{
 	Long: `DB Prompter is a single-binary tool that connects to PostgreSQL, MySQL,
 SQL Server, or SQLite databases, indexes their metadata (tables, columns,
 foreign keys), lets you tag tables with plain-language descriptions, and
-generates SQL queries with AI.`,
+generates SQL queries with AI.
+
+Running dbprompter with no subcommand starts the web dashboard.`,
+	Args: cobra.NoArgs,
+	RunE: runServe,
 }
 
 func Execute() {
