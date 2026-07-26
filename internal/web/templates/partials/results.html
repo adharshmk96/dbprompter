@@ -2,7 +2,10 @@
 <div class="card results-card">
   {{if .IsSelect}}
     <div class="row between results-meta">
-      <span>{{len .Rows}} row{{if ne (len .Rows) 1}}s{{end}}{{if .Truncated}} <span class="pill nn">truncated at 500</span>{{end}}</span>
+      <span>
+        {{if .Rows}}rows {{.FirstRow}}–{{.LastRow}}{{else}}no rows{{end}}
+        {{if or .HasMore (gt .Offset 0)}}<span class="pill nn">page {{.Page}}</span>{{end}}
+      </span>
       <span class="muted xs">{{.Duration}}</span>
     </div>
     <div class="results-scroll">
@@ -15,6 +18,17 @@
         </tbody>
       </table>
     </div>
+    {{if or .HasMore (gt .Offset 0)}}
+    <div class="row gap pager">
+      <button class="btn" {{if eq .Offset 0}}disabled{{end}}
+        hx-post="/query/run" hx-target="#query-results" hx-swap="innerHTML"
+        hx-vals='{"offset": {{.PrevOffset}}}'>← Prev</button>
+      <button class="btn" {{if not .HasMore}}disabled{{end}}
+        hx-post="/query/run" hx-target="#query-results" hx-swap="innerHTML"
+        hx-vals='{"offset": {{.NextOffset}}}'>Next →</button>
+      <span class="muted xs">100 rows per page</span>
+    </div>
+    {{end}}
   {{else}}
     <div class="results-meta">
       <span class="pill pk">OK</span> {{.RowsAffected}} row{{if ne .RowsAffected 1}}s{{end}} affected

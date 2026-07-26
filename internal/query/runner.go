@@ -12,18 +12,38 @@ import (
 )
 
 const (
-	MaxRows = 500
-	Timeout = 30 * time.Second
+	PageSize = 100
+	Timeout  = 30 * time.Second
 )
 
 type Result struct {
 	Columns      []string
 	Rows         [][]string
 	RowsAffected int64
-	Truncated    bool
 	Duration     time.Duration
 	IsSelect     bool
+
+	// Paging. Offset is the index of the first row in Rows; HasMore reports
+	// that the driver had at least one row past this page.
+	Offset  int
+	HasMore bool
 }
+
+// Page returns the 1-based page number of this result.
+func (r *Result) Page() int { return r.Offset/PageSize + 1 }
+
+// NextOffset and PrevOffset are the offsets the pager buttons should request.
+func (r *Result) NextOffset() int { return r.Offset + PageSize }
+func (r *Result) PrevOffset() int {
+	if r.Offset < PageSize {
+		return 0
+	}
+	return r.Offset - PageSize
+}
+
+// FirstRow and LastRow are the 1-based row numbers this page covers.
+func (r *Result) FirstRow() int { return r.Offset + 1 }
+func (r *Result) LastRow() int  { return r.Offset + len(r.Rows) }
 
 var readOnlyPrefixes = []string{"select", "with", "show", "explain", "describe", "desc", "pragma", "values"}
 
@@ -45,9 +65,14 @@ func isReadOnly(sqlText string) bool {
 	return false
 }
 
-// Run executes sqlText against the target database. When allowWrites is
-// false, only statements that start with a read-only keyword are accepted.
-func Run(dbType, dsn, sqlText string, allowWrites bool) (*Result, error) {
+// Run executes sqlText against the target database and returns one page of
+// PageSize rows starting at offset. When allowWrites is false, only statements
+// that start with a read-only keyword are accepted.
+//
+// Paging re-runs the query and skips offset rows in the driver rather than
+// rewriting the user's SQL with LIMIT/OFFSET: the SQL stays exactly what the
+// user wrote, and it works the same across every supported dialect.
+func Run(dbType, dsn, sqlText string, allowWrites bool, offset int) (*Result, error) {
 	if strings.TrimSpace(sqlText) == "" {
 		return nil, fmt.Errorf("empty query")
 	}
@@ -86,15 +111,24 @@ func Run(dbType, dsn, sqlText string, allowWrites bool) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := &Result{Columns: cols, IsSelect: true}
+	if offset < 0 {
+		offset = 0
+	}
+	out := &Result{Columns: cols, IsSelect: true, Offset: offset}
 	raw := make([]any, len(cols))
 	ptrs := make([]any, len(cols))
 	for i := range raw {
 		ptrs[i] = &raw[i]
 	}
+	skipped := 0
 	for rows.Next() {
-		if len(out.Rows) >= MaxRows {
-			out.Truncated = true
+		if skipped < offset {
+			skipped++
+			continue
+		}
+		if len(out.Rows) >= PageSize {
+			// one row past the page: there is a next page
+			out.HasMore = true
 			break
 		}
 		if err := rows.Scan(ptrs...); err != nil {

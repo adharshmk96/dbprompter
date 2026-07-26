@@ -244,7 +244,8 @@ func (s *Server) runQuery(w http.ResponseWriter, r *http.Request) {
 		s.renderAlert(w, "error", "Pick a connection first.")
 		return
 	}
-	res, err := query.Run(conn.Type, conn.DSN, sqlText, allowWrites)
+	offset, _ := strconv.Atoi(r.FormValue("offset"))
+	res, err := query.Run(conn.Type, conn.DSN, sqlText, allowWrites, offset)
 	if err != nil {
 		s.renderAlert(w, "error", errText(err))
 		return

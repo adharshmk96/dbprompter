@@ -221,6 +221,8 @@ table.grid tbody tr:hover { background: rgba(124, 147, 255, .05); }
   font-family: var(--mono); font-size: .78rem; line-height: 1.45;
   white-space: pre; overflow: auto;
 }
+.pager { margin-top: .75rem; align-items: center; }
+.pager .btn[disabled] { opacity: .4; cursor: not-allowed; }
 .spinner { color: var(--accent-2); font-size: .85rem; }
 .htmx-indicator { opacity: 0; transition: opacity .2s ease; }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
